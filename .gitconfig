@@ -1,0 +1,172 @@
+[branch]
+    autosetuprebase = always
+
+[user]
+    name = MaChao
+    email = chao@coinport.com
+
+[color]
+    ui = true
+
+[alias]
+    ad = add
+    uad = add -u
+    aad = add -A
+    iad = add -i
+
+    br = branch
+    mbr = branch -m
+    dbr = branch -d
+    rbr = branch -r
+
+    bs = bisect
+    sbs = bisect start
+    gbs = bisect good
+    bbs = bisect bad
+    lbs = bisect log
+    rpbs = bisect replay
+    bbco = checkout bisect/bad
+    rbs = bisect reset
+
+    bm = blame
+    lbm = blame -L
+
+    cl = clone
+    bcl = clone --bare
+    mcl = clone --mirror
+
+    co = checkout
+    bco = checkout -b
+    tbco = checkout --track -b
+
+    ci = commit
+    mci = commit -m
+    amci = commit -a -m
+    smci = commit -s -m
+    cci = commit -C
+    scci = commit -s -C
+    amci = commit --amend -m
+    asmci = commit --amend -s -m
+    acci = commit --amend -C
+    ascci = commit --amend -s -C
+    aemci = commit --allow-empty -m
+
+    cp = cherry-pick
+
+    cf = cat-file
+    pcf = cat-file -p
+    tcf = cat-file -t
+
+    df = diff
+    cdf = diff --cached
+    hdf = diff HEAD
+    sdf = diff --stat
+
+    dt = difftool
+
+    db = describe
+    fp = format-patch
+
+    fp = format-patch
+    mt = mergetool
+
+    ft = fetch
+    nft = fetch --no-tags
+
+    gcfg = config --global
+    egcfg = config --global -e
+    ecfg = config -e
+
+    lg = log
+    glg = log --graph
+    olg = log --oneline
+    dlg = log --decorate
+    rlg = log --raw
+    slg = log --stat
+    plg = log -p
+    polg = log --pretty=oneline
+    pflg = log --pretty=fuller
+    oglg = log --oneline --graph
+    alg = log --pretty=fuller --graph --raw --decorate
+
+    lf = ls-files
+    slf = ls-files -s
+
+    lr = ls-remote
+    hlr = ls-remote --heads
+
+    mtag = tag -m
+    atag = tag -a
+    dtag = tag -d
+    ttag = tag --tags
+    ntag = tag -n1
+    tdb = describe --tags
+
+    mg = merge
+    cmg = merge --continue
+    smg = merge --skip
+    amg = merge --abort
+
+    nr = name-rev
+    tnr = name-rev --tags
+
+    rb = rebase
+    orb = rebase --onto
+    irb = rebase -i
+
+    rst = reset
+    hrst = reset --hard
+    srst = reset --soft
+
+    rl = reflog
+
+    rp = rev-parse
+    gd = rev-parse --git-dir
+    grd = rev-parse --show-cdup
+    brp = rev-parse --symbolic --branches
+    trp = rev-parse --symbolic --tags
+
+    rls = rev-list
+
+    orls = rev-list --oneline
+
+    rt = remote
+    art = remote add
+    rrt = remote rm
+    vrt = remote -v
+    surt = remote set-url
+    psurt = remote --push set-url
+    udrt = remote update
+    rnrt = remote rename
+
+    rpull = pull --rebase
+
+    ram = am --resolved
+    sam = am --skip
+    aam = am --abort
+
+    st = status
+    sst = status -s
+
+    sh = show
+    ssh = show --stat
+
+    sr = show-ref
+
+    sfp = format-patch -s
+
+    ss = stash
+    ass = stash apply
+    pss = stash pop
+    piss = stash pop --index
+    lss = stash list
+    css = stash clear
+[diff]
+    tool = meld
+[merge]
+    tool = meld
+[difftool]
+    prompt = false
+[mergetool]
+    prompt = false
+	keepBackup = false

@@ -1,0 +1,118 @@
+vim 支持剪切板:
+    sudo apt-get install vim vim-scripts vim-gnome vim-gtk
+    sudo apt-get install exuberant-ctags cscope
+
+install latex2012:
+    sudo add-apt-repository ppa:texlive-backports/pp
+    sudo apt-get update
+    sudo apt-get install texlive-full
+
+公布文件价（不在GDS中）：
+cxagents.com
+kaagents.com
+
+运价规则:
+    http://www.qwoq.cn/cont.asp?id=559
+
+gradle只运行一个测试：
+    gradle -Dtest.single=FooTest test
+
+install JAVA:
+    http://www.wikihow.com/Upgrade-Oracle-Java-on-Ubuntu-Linux
+
+git diff/merge with meld:
+    gedit ~/.gitconfig 在最后加入
+    [diff]
+        tool = meld
+    [difftool]
+        prompt = false
+
+git 查看某个文件的历史版本:
+    git log --follow -p file
+
+清空使用的swap：
+sudo swapoff -a
+sudo swapon -a
+
+git 如何让单个文件回退到指定的版本:
+    http://www.sctarena.com/Article/Article.asp?nid=4419
+    1.进入到文件所在文件目录，或者能找到文件的路径
+    查看文件的修改记录
+     $ git log MainActivity.java
+    结果：
+    commit 7641210b242a95eed17827dd8159e76bdad6d619
+    Author: ronanhardiman <liqiang.isman@gmail.com>
+    Date:   Mon Apr 29 00:51:00 2013 +0800
+        System.currentTimeMillis() 替代 timer 实现 连续两次返回键退出
+        System.currentTimeMillis() 替代 timer 实现 连续两次返回键退出
+    commit a4e215234aa4927c85693dca7b68e9976948a35e
+    Author: kaxi4it <gyj_android@sina.com>
+    Date:   Sat Apr 27 16:54:48 2013 +0800
+        修正了退出程序的BUG
+        用INT代替BOOL标记，修正了快速点击返回键一直播放退出动画的BUG，跳转页面后标记
+    commit d31fcc01223407492310c1567a7b84ece1287368
+    Author: yjl <yujilong@eoemobile.com>
+    Date:   Mon Mar 25 12:09:21 2013 +0800
+
+    2.回退到指定的版本
+    $ git reset a4e215234aa4927c85693dca7b68e9976948a35e MainActivity.java
+    结果
+    Unstaged changes after reset:
+    M       source/src/cn/eoe/app/ui/MainActivity.java
+    su@SUCHANGLI /e/eoeclient/android-app/source/src/cn/eoe/app/ui (master)
+    3.提交到本地参考
+    $ git commit -m "revert old file because yjl commmit have a bug"
+    结果
+    [master 874e01a] revert old file because yjl commmit have a bug
+     1 file changed, 26 insertions(+), 19 deletions(-)
+    su@SUCHANGLI /e/eoeclient/android-app/source/src/cn/eoe/app/ui (master)
+    4.更新到工作目录
+    $ git checkout MainActivity.java
+    5.提交到远程仓库
+    $ git push origin master
+    如果提交需要用户名密码的话，会有提示；
+    结果
+    Username for ’https://github.com’: com360
+    Password for ’https://com360@github.com’:
+    Counting objects: 17, done.
+    Delta compression using up to 4 threads.
+    Compressing objects: 100% (7/7), done.
+    Writing objects: 100% (9/9), 860 bytes, done.
+    Total 9 (delta 5), reused 0 (delta 0)
+    To https://github.com/com360/android-app.git
+       7db7346..874e01a  master -> master
+    su@SUCHANGLI /e/eoeclient/android-app/source/src/cn/eoe/app/ui (master)
+    这样就把指定的文件回退到指定的版本了。
+
+Git 服务器搭建：
+
+    主要参考了这5篇文章：
+    How to create own Git Server with Gitolite and Gitweb in Ubuntu
+    Ubuntu 12.04 Gitolite 安装指南
+    ubuntu上配置git服务器 - 秋江鹜 - 博客园
+    Git教程 - 搭建服务端
+    Ubuntu Apache配置以及cgi配置（http://www.docin.com/p-507241533.html）
+
+    其中遇到的一个最麻烦的问题是cgi路径ScriptAlias之后无法运行cgi，而只是在浏览器上显示。
+    后来发现原因是apache的一个mod没有软连接到正确的目录中。作如下操作就可以解决问题了：
+    cd /etc/apache2/mods-enabled/
+    ln -s ../mods-available/cgid.load
+    重启apache即可/etc/init.d/apache2 restart
+
+    至此还有一个问题，就是gitweb.cgi会调用cgi-bin/static目录下的资源文件。而cgi-bin下的所有文件都会当做脚本执行，所以无法被找到。
+    可以重新搞一个目录映射，或者把static资源文件放在/var/www下，然后修改gitweb.cgi中的路径为绝对路径。（如static/git-logo.png改为/static/git-logo.png）
+
+    终于搞定git + gitolite + gitweb了:)
+
+Keeping your git repo clean of .orig files!
+    http://travisjeffery.com/b/2011/12/keeping-your-git-repo-clean-of-orig-files/
+
+Git删除远程分支:
+git push origin --delete <branchName>
+
+删除tag这么用：
+git push origin --delete tag <tagname>
+
+交换ctrl和caps键：
+grep -e "ctrl:\|:ctrl" /usr/share/X11/xkb/rules/evdev.lst
+dconf write /org/gnome/desktop/input-sources/xkb-options "['ctrl:nocaps']"

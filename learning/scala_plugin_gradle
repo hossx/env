@@ -1,0 +1,190 @@
+Chapter 25. The Scala Plugin
+
+The Scala plugin extends the Java plugin to add support for Scala projects. It can deal with Scala code, mixed Scala and Java code, and even pure Java code (although we don't necessarily recommend to use it for the latter). The plugin supports joint compilation, which allows to freely mix and match Scala and Java code, with dependencies in both directions. For example, a Scala class can extend a Java class that in turn extends a Scala class. This makes it possible to use the best language for the job, and to rewrite any class in the other language if needed.
+
+25.1. Usage
+
+To use the Scala plugin, include in your build script:
+
+Example 25.1. Using the Scala plugin
+
+build.gradle
+apply plugin: 'scala'
+25.2. Tasks
+
+The Scala plugin adds the following tasks to the project.
+
+Table 25.1. Scala plugin - tasks
+
+Task name   Depends on  Type    Description
+compileScala    compileJava ScalaCompile    Compiles production Scala source files.
+compileTestScala    compileTestJava ScalaCompile    Compiles test Scala source files.
+compileSourceSetScala   compileSourceSetJava    ScalaCompile    Compiles the given source set's Scala source files.
+scaladoc    -   ScalaDoc    Generates API documentation for the production Scala source files.
+The Scala plugin adds the following dependencies to tasks added by the Java plugin.
+
+Table 25.2. Scala plugin - additional task dependencies
+
+Task name   Depends on
+classes compileScala
+testClasses compileTestScala
+sourceSetClasses    compileSourceSetScala
+Figure 25.1. Scala plugin - tasks
+
+Scala plugin - tasks
+25.3. Project layout
+
+The Scala plugin assumes the project layout shown below. All the Scala source directories can contain Scala and Java code. The Java source directories may only contain Java source code. None of these directories need to exist or have anything in them; the Scala plugin will simply compile whatever it finds.
+
+Table 25.3. Scala plugin - project layout
+
+Directory   Meaning
+src/main/java   Production Java source
+src/main/resources  Production resources
+src/main/scala  Production Scala sources. May also contain Java sources for joint compilation.
+src/test/java   Test Java source
+src/test/resources  Test resources
+src/test/scala  Test Scala sources. May also contain Java sources for joint compilation.
+src/sourceSet/java  Java source for the given source set
+src/sourceSet/resources Resources for the given source set
+src/sourceSet/scala Scala sources for the given source set. May also contain Java sources for joint compilation.
+25.3.1. Changing the project layout
+
+Just like the Java plugin, the Scala plugin allows to configure custom locations for Scala production and test sources.
+
+Example 25.2. Custom Scala source layout
+
+build.gradle
+sourceSets {
+    main {
+        scala {
+            srcDirs = ['src/scala']
+        }
+    }
+    test {
+        scala {
+            srcDirs = ['test/scala']
+        }
+    }
+}
+25.4. Dependency management
+
+Scala projects need to declare a scala-library dependency. This dependency will then be used on compile and runtime class paths. It will also be used to get hold of the Scala compiler and Scaladoc tool, respectively. [12]
+
+If Scala is used for production code, the scala-library dependency should be added to the compile configuration:
+
+Example 25.3. Declaring a Scala dependency for production code
+
+build.gradle
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile 'org.scala-lang:scala-library:2.9.1'
+}
+If Scala is only used for test code, the scala-library dependency should be added to the testCompile configuration:
+
+Example 25.4. Declaring a Scala dependency for test code
+
+build.gradle
+dependencies {
+    testCompile "org.scala-lang:scala-library:2.9.2"
+}
+25.5. Automatic configuration of scalaClasspath
+
+ScalaCompile and ScalaDoc tasks consume Scala in two ways: on their classpath, and on their scalaClasspath. The former is used to locate classes referenced by the source code, and will typically contain scala-library along with other libraries. The latter is used to load and execute the Scala compiler and Scaladoc tool, respectively, and should only contain the scala-compiler library and its dependencies.
+
+Unless a task's scalaClasspath is configured explicitly, the Scala (base) plugin will try to infer it from the task's classpath. This is done as follows:
+
+If a scala-library Jar is found on classpath, and the project has at least one repository declared, a corresponding scala-compiler repository dependency will be added to scalaClasspath.
+Otherwise, execution of the task will fail with a message saying that scalaClasspath could not be inferred.
+25.6. Convention properties
+
+The Scala plugin does not add any convention properties to the project.
+
+25.7. Source set properties
+
+The Scala plugin adds the following convention properties to each source set in the project. You can use these properties in your build script as though they were properties of the source set object (see Section 21.3, “Conventions”).
+
+Table 25.4. Scala plugin - source set properties
+
+Property name   Type    Default value   Description
+scala   SourceDirectorySet (read-only)   Not null    The Scala source files of this source set. Contains all .scala and .java files found in the Scala source directories, and excludes all other types of files.
+scala.srcDirs   Set<File>. Can set using anything described in Section 16.5, “Specifying a set of input files”. [projectDir/src/name/scala]  The source directories containing the Scala source files of this source set. May also contain Java source files for joint compilation.
+allScala    FileTree (read-only)     Not null    All Scala source files of this source set. Contains only the .scala files found in the Scala source directories.
+These convention properties are provided by a convention object of type ScalaSourceSet.
+
+The Scala plugin also modifies some source set properties:
+
+Table 25.5. Scala plugin - source set properties
+
+Property name   Change
+allJava Adds all .java files found in the Scala source directories.
+allSource   Adds all source files found in the Scala source directories.
+25.8. Fast Scala Compiler
+
+The Scala plugin includes support for fsc, the Fast Scala Compiler. fsc runs in a separate daemon process and can speed up compilation significantly.
+
+Example 25.5. Enabling the Fast Scala Compiler
+
+build.gradle
+compileScala {
+    scalaCompileOptions.useCompileDaemon = true
+
+    // optionally specify host and port of the daemon:
+    scalaCompileOptions.daemonServer = "localhost:4243"
+}
+Note that fsc expects to be restarted whenever the contents of its compile class path change. (It does detect changes to the compile class path itself.) This makes it less suitable for multi-project builds.
+
+25.9. Compiling in external process
+
+When scalaCompileOptions.fork is set to true, compilation will take place in an external process. The details of forking depend on which compiler is used. The Ant based compiler (scalaCompileOptions.useAnt = true) will fork a new process for every ScalaCompile task, and does not fork by default. The Zinc based compiler (scalaCompileOptions.useAnt = false) will leverage the Gradle compiler daemon, and does so by default.
+
+Memory settings for the external process default to the JVM's defaults. To adjust memory settings, configure scalaCompileOptions.forkOptions as needed:
+
+Example 25.6. Adjusting memory settings
+
+build.gradle
+tasks.withType(ScalaCompile) {
+    configure(scalaCompileOptions.forkOptions) {
+        memoryMaximumSize = '1g'
+        jvmArgs = ['-XX:MaxPermSize=512m']
+    }
+}
+25.10. Incremental compilation
+
+By compiling only classes whose source code has changed since the previous compilation, and classes affected by these changes, incremental compilation can significantly reduce Scala compilation time. It is particularly effective when frequently compiling small code increments, as is often done at development time.
+
+The Scala plugin now supports incremental compilation by integrating with Zinc, a standalone version of sbt's incremental Scala compiler. To switch the ScalaCompile task from the default Ant based compiler to the new Zinc based compiler, set scalaCompileOptions.useAnt to false:
+
+Example 25.7. Activating the Zinc based compiler
+
+build.gradle
+tasks.withType(ScalaCompile) {
+    scalaCompileOptions.useAnt = false
+}
+Except where noted in theAPI documentation, the Zinc based compiler supports exactly the same configuration options as the Ant based compiler. Note, however, that the Zinc compiler requires Java 6 or higher to run. This means that Gradle itself has to be run with Java 6 or higher.
+
+The Scala plugin adds a configuration named zinc to resolve the Zinc library and its dependencies. To override the Zinc version that Gradle uses by default, add an explicit Zinc dependency (for example zinc "com.typesafe.zinc:zinc:0.1.4"). Regardless of which Zinc version is used, Zinc will always use the Scala compiler found on the scalaTools configuration.
+
+Just like Gradle's Ant based compiler, the Zinc based compiler supports joint compilation of Java and Scala code. By default, all Java and Scala code under src/main/scala will participate in joint compilation. With the Zinc based compiler, even Java code will be compiled incrementally.
+
+Incremental compilation requires dependency analysis of the source code. The results of this analysis are stored in the file designated by scalaCompileOptions.incrementalOptions.analysisFile (which has a sensible default). In a multi-project build, analysis files are passed on to downstream ScalaCompile tasks to enable incremental compilation across project boundaries. For ScalaCompile tasks added by the Scala plugin, no configuration is necessary to make this work. For other ScalaCompile tasks, scalaCompileOptions.incrementalOptions.publishedCode needs to be configured to point to the classes folder or Jar archive by which the code is passed on to compile class paths of downstream ScalaCompile tasks. Note that if publishedCode is not set correctly, downstream tasks may not recompile code affected by upstream changes, leading to incorrect compilation results.
+
+Due to the overhead of dependency analysis, a clean compilation or a compilation after a larger code change may take longer than with the Ant based compiler. For CI builds and release builds, we currently recommend to use the Ant based compiler.
+
+Note that Zinc's Nailgun based daemon mode is not supported. Instead, we plan to enhance Gradle's own compiler daemon to stay alive across Gradle invocations, reusing the same Scala compiler. This is expected to yield another significant speedup for Scala compilation.
+
+25.11. Eclipse Integration
+
+When the Eclipse plugin encounters a Scala project, it adds additional configuration to make the project work with Scala IDE out of the box. Specifically, the plugin adds a Scala nature and dependency container.
+
+25.12. IntelliJ IDEA Integration
+
+When the IDEA plugin encounters a Scala project, it adds additional configuration to make the project work with IDEA out of the box. Specifically, the plugin adds a Scala facet and a Scala compiler library that matches the Scala version on the project's class path.
+
+
+[12] See Section 25.5, “Automatic configuration of scalaClasspath”.
+
+Previous|Contents|Next
